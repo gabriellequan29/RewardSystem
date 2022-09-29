@@ -41,15 +41,15 @@ public class Reward {
             int points = calEach(merchant_code, amount_cents);
             sb.append(id).append("-").append(points).append("\n");
         }
-        System.out.println(sb);
+//        System.out.println(sb);
         int sportcheckAmount = amounts.getOrDefault("sportcheck", 0);
         int tim_hortonsAmount = amounts.getOrDefault("tim_hortons", 0);
         int subwayAmount = amounts.getOrDefault("subway", 0);
+        int total = calTotal(sportcheckAmount, tim_hortonsAmount, subwayAmount);
         System.out.println(sportcheckAmount);
         System.out.println(tim_hortonsAmount);
         System.out.println(subwayAmount);
-
-
+        System.out.println(total);
         return "";
     }
 
@@ -59,13 +59,8 @@ public class Reward {
         switch (merchant_code) {
             case "sportcheck":
                 while (amount_cents > 0) {
-                    // Rule 3
-                    if (amount_cents >= 75) {
-                        res += (amount_cents / 75) * 200;
-                        amount_cents = amount_cents % 75;
-                    }
                     // Rule 6
-                    else if (amount_cents >= 20) {
+                    if (amount_cents >= 20) {
                         res += (amount_cents / 20) * 75;
                         amount_cents = amount_cents % 20;
                     }
@@ -86,6 +81,7 @@ public class Reward {
     }
 
     public static int calTotal(int sport, int tims, int subway) {
+        sport = sport / 100; tims = tims / 100; subway = subway / 100;
         int res = 0;
         while (sport > 0 || tims > 0 || subway > 0) {
             if (sport >= 75 && tims >= 25 && subway >= 25) {
@@ -96,7 +92,27 @@ public class Reward {
                 subway -= 25 * count;
             }
             else if (sport >= 75 && tims >= 25) {
-
+                int count = Math.min(sport/75, tims/25);
+                res += count * 300;
+                sport -= 75 * count;
+                tims -= 25 * count;
+            }
+            else if (sport >= 25 && tims >= 10 && subway >= 10) {
+                int count = Math.min(Math.min(sport/25, tims/10), subway/10);
+                res += count * 150;
+                sport -= 25 * count;
+                tims -= 10 * count;
+                subway -= 10 * count;
+            }
+            else if (sport >= 20) {
+                res += 75 * (sport / 20);
+                sport = sport % 20;
+            }
+            else {
+                res += sport + tims + subway;
+                sport = 0;
+                tims = 0;
+                subway = 0;
             }
         }
         return res;
