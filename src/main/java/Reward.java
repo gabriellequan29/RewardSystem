@@ -46,11 +46,9 @@ public class Reward {
         int tim_hortonsAmount = amounts.getOrDefault("tim_hortons", 0);
         int subwayAmount = amounts.getOrDefault("subway", 0);
         int total = calTotal(sportcheckAmount, tim_hortonsAmount, subwayAmount);
-        System.out.println(sportcheckAmount);
-        System.out.println(tim_hortonsAmount);
-        System.out.println(subwayAmount);
-        System.out.println(total);
-        return "";
+        sb.append("Total-").append(total);
+        System.out.println(sb);
+        return sb.toString();
     }
 
     public static int calEach(String merchant_code, int amount_cents) {
