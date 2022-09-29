@@ -1,8 +1,9 @@
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.sql.SQLOutput;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Reward {
@@ -31,6 +32,11 @@ public class Reward {
         JSONObject obj = new JSONObject(transactions);
         JSONArray arr = obj.getJSONArray("transactions");
         StringBuilder sb = new StringBuilder();
+        Rule rule1 = new RuleOne();
+        Rule rule2 = new RuleTwo();
+        Rule rule4 = new RuleFour();
+        Rule rule6 = new RuleSix();
+        Rule rule7 = new RuleSeven();
         for (int i = 0; i < arr.length(); i++)
         {
             JSONObject transaction = arr.getJSONObject(i);
@@ -38,14 +44,25 @@ public class Reward {
             String merchant_code = transaction.getString(MERCHANT);
             int amount_cents = transaction.getInt(AMOUNT);
             amounts.put(merchant_code, amounts.getOrDefault(merchant_code, 0) + amount_cents);
-            int points = calEach(merchant_code, amount_cents);
+            int points = 0;
+            List<Transaction> list = new ArrayList<>();
+            Transaction t = new Transaction(merchant_code, amount_cents);
+            list.add(t);
+            points += rule6.calculate(list);
+            points += rule7.calculate(list);
             sb.append(id).append("-").append(points).append("\n");
         }
-//        System.out.println(sb);
-        int sportcheckAmount = amounts.getOrDefault("sportcheck", 0);
-        int tim_hortonsAmount = amounts.getOrDefault("tim_hortons", 0);
-        int subwayAmount = amounts.getOrDefault("subway", 0);
-        int total = calTotal(sportcheckAmount, tim_hortonsAmount, subwayAmount);
+        List<Transaction> list = new ArrayList<>();
+        for (String key : amounts.keySet()) {
+            Transaction t = new Transaction(key, amounts.get(key));
+            list.add(t);
+        }
+        int total = 0;
+        total += rule1.calculate(list);
+        total += rule2.calculate(list);
+        total += rule4.calculate(list);
+        total += rule6.calculate(list);
+        total += rule7.calculate(list);
         sb.append("Total-").append(total);
         System.out.println(sb);
         return sb.toString();
