@@ -11,10 +11,6 @@ public class Transaction {
         return merchantCode;
     }
 
-    public void setMerchantCode(String merchantCode) {
-        this.merchantCode = merchantCode;
-    }
-
     public int getAmountCents() {
         return amountCents;
     }

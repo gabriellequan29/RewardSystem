@@ -21,115 +21,60 @@ public class Reward {
                 "{\"id\": \"T09\",\"date\": \"2021-05-09\", \"merchant_code\" : \"sportcheck\", \"amount_cents\": 7326}," +
                 "{\"id\": \"T10\",\"date\": \"2021-05-10\", \"merchant_code\" : \"tim_hortons\", \"amount_cents\": 1321}" +
                         "]}";
-        getReward(transactions);
+        String output = getReward(transactions);
+        System.out.println(output);
     }
 
     private static Map<String, Integer> amounts;
     private static final String MERCHANT = "merchant_code";
     private static final String AMOUNT = "amount_cents";
+    private static final String TRANSACTIONS = "transactions";
     public static String getReward(String transactions) {
+        // merchant_code -> total amount_cent
         amounts = new HashMap<>();
+        // parse input string
         JSONObject obj = new JSONObject(transactions);
-        JSONArray arr = obj.getJSONArray("transactions");
-        StringBuilder sb = new StringBuilder();
-        Rule rule1 = new RuleOne();
-        Rule rule2 = new RuleTwo();
-        Rule rule4 = new RuleFour();
-        Rule rule6 = new RuleSix();
-        Rule rule7 = new RuleSeven();
+        JSONArray arr = obj.getJSONArray(TRANSACTIONS);
+        StringBuilder output = new StringBuilder();
+        // append different rules according to priority
+        List<Rule> rules = new ArrayList<>();
+        rules.add(new RuleOne());
+        rules.add(new RuleTwo());
+        rules.add(new RuleFour());
+        rules.add(new RuleSix());
+        rules.add(new RuleSeven());
+        // calculate max reward points for each transaction
         for (int i = 0; i < arr.length(); i++)
         {
+            // parse the transaction
             JSONObject transaction = arr.getJSONObject(i);
             String id = transaction.getString("id");
             String merchant_code = transaction.getString(MERCHANT);
             int amount_cents = transaction.getInt(AMOUNT);
+            // update total_amount_cents for merchant_code
             amounts.put(merchant_code, amounts.getOrDefault(merchant_code, 0) + amount_cents);
-            int points = 0;
+            long points = 0;
             List<Transaction> list = new ArrayList<>();
             Transaction t = new Transaction(merchant_code, amount_cents);
             list.add(t);
-            points += rule6.calculate(list);
-            points += rule7.calculate(list);
-            sb.append(id).append("-").append(points).append("\n");
+            // apply rules to each transaction according to priority
+            for (Rule rule : rules) {
+                points += rule.calculate(list);
+            }
+            // append the result to the output
+            output.append(id).append("-").append(points).append("\n");
         }
+        // calculate total max reward points
         List<Transaction> list = new ArrayList<>();
         for (String key : amounts.keySet()) {
             Transaction t = new Transaction(key, amounts.get(key));
             list.add(t);
         }
-        int total = 0;
-        total += rule1.calculate(list);
-        total += rule2.calculate(list);
-        total += rule4.calculate(list);
-        total += rule6.calculate(list);
-        total += rule7.calculate(list);
-        sb.append("Total-").append(total);
-        System.out.println(sb);
-        return sb.toString();
-    }
-
-    public static int calEach(String merchant_code, int amount_cents) {
-        int res = 0;
-        amount_cents = amount_cents / 100;
-        switch (merchant_code) {
-            case "sportcheck":
-                while (amount_cents > 0) {
-                    // Rule 6
-                    if (amount_cents >= 20) {
-                        res += (amount_cents / 20) * 75;
-                        amount_cents = amount_cents % 20;
-                    }
-                    // Rule 7
-                    else {
-                        res += amount_cents;
-                        amount_cents = 0;
-                    }
-                }
-                return res;
-            case "tim_hortons":
-            case "subway":
-                // Rule 7
-                res += amount_cents;
-                return res;
+        long total = 0;
+        for (Rule rule : rules) {
+            total += rule.calculate(list);
         }
-        return res;
-    }
-
-    public static int calTotal(int sport, int tims, int subway) {
-        sport = sport / 100; tims = tims / 100; subway = subway / 100;
-        int res = 0;
-        while (sport > 0 || tims > 0 || subway > 0) {
-            if (sport >= 75 && tims >= 25 && subway >= 25) {
-                int count = Math.min(Math.min(sport/75, tims/25), subway/25);
-                res += count * 500;
-                sport -= 75 * count;
-                tims -= 25 * count;
-                subway -= 25 * count;
-            }
-            else if (sport >= 75 && tims >= 25) {
-                int count = Math.min(sport/75, tims/25);
-                res += count * 300;
-                sport -= 75 * count;
-                tims -= 25 * count;
-            }
-            else if (sport >= 25 && tims >= 10 && subway >= 10) {
-                int count = Math.min(Math.min(sport/25, tims/10), subway/10);
-                res += count * 150;
-                sport -= 25 * count;
-                tims -= 10 * count;
-                subway -= 10 * count;
-            }
-            else if (sport >= 20) {
-                res += 75 * (sport / 20);
-                sport = sport % 20;
-            }
-            else {
-                res += sport + tims + subway;
-                sport = 0;
-                tims = 0;
-                subway = 0;
-            }
-        }
-        return res;
+        output.append("Total-").append(total);
+        return output.toString();
     }
 }

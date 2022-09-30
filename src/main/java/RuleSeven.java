@@ -8,6 +8,7 @@ public class RuleSeven extends Rule {
     @Override
     public int calculate(List<Transaction> list) {
         int res = 0;
+        // apply rule 7
         for (Transaction t : list) {
             res += reward * (t.getAmountCents() / point);
             t.setAmountCents(0);

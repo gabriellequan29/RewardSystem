@@ -6,6 +6,7 @@ public class RuleTwo extends Rule {
     int p2 = 25;
     @Override
     public int calculate(List<Transaction> list) {
+        // get transaction
         for (Transaction t : list) {
             switch (t.getMerchantCode()) {
                 case Constants.SPORT_CHECK:
@@ -20,22 +21,25 @@ public class RuleTwo extends Rule {
                 default:
             }
         }
-
+        // get amount
         int sportAmount = sportcheck == null ? 0 : sportcheck.getAmountCents();
         int timsAmount = timhortons == null ? 0 : timhortons.getAmountCents();
         int res = 0;
+        // apply rule 2
         if (sportAmount >= p1 && timsAmount >= p2) {
             int count = Math.min(sportAmount / p1, timsAmount / p2);
             res += count * reward;
             sportAmount -= p1 * count;
             timsAmount -= p2 * count;
         }
+        // update amount
         if (sportcheck != null) {
             sportcheck.setAmountCents(sportAmount);
         }
         if (timhortons != null) {
             timhortons.setAmountCents(timsAmount);
         }
+        reset();
         return res;
     }
 }

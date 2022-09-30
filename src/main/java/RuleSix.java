@@ -5,6 +5,7 @@ public class RuleSix extends Rule {
     int point = 20;
     @Override
     public int calculate(List<Transaction> list) {
+        // get transaction
         for (Transaction t : list) {
             switch (t.getMerchantCode()) {
                 case Constants.SPORT_CHECK:
@@ -20,11 +21,15 @@ public class RuleSix extends Rule {
             }
         }
         int res = 0;
+        // get amount
         int sportAmount = sportcheck == null ? 0 : sportcheck.getAmountCents();
+        // apply rule 6
         res += reward * (sportAmount / point);
+        // update amount
         if (sportcheck != null) {
             sportcheck.setAmountCents(sportAmount % point);
         }
+        reset();
         return res;
     }
 }
