@@ -6,25 +6,26 @@ public class RuleTwo extends Rule {
     int p2 = 25;
     @Override
     public int calculate(List<Transaction> list) {
-        // get transaction
+        int sportAmount = 0;
+        int timsAmount = 0;
+        int subAmount = 0;
+        int res = 0;
+
+        // get amount
         for (Transaction t : list) {
             switch (t.getMerchantCode()) {
                 case Constants.SPORT_CHECK:
-                    sportcheck = t;
+                    sportAmount = t.getAmountCents();
                     break;
                 case Constants.TIM_HORTONS:
-                    timhortons = t;
+                    timsAmount = t.getAmountCents();
                     break;
                 case Constants.SUBWAY:
-                    subway = t;
+                    subAmount = t.getAmountCents();
                     break;
                 default:
             }
         }
-        // get amount
-        int sportAmount = sportcheck == null ? 0 : sportcheck.getAmountCents();
-        int timsAmount = timhortons == null ? 0 : timhortons.getAmountCents();
-        int res = 0;
         // apply rule 2
         if (sportAmount >= p1 && timsAmount >= p2) {
             int count = Math.min(sportAmount / p1, timsAmount / p2);
@@ -33,13 +34,20 @@ public class RuleTwo extends Rule {
             timsAmount -= p2 * count;
         }
         // update amount
-        if (sportcheck != null) {
-            sportcheck.setAmountCents(sportAmount);
+        for (Transaction t : list) {
+            switch (t.getMerchantCode()) {
+                case Constants.SPORT_CHECK:
+                    t.setAmountCents(sportAmount);
+                    break;
+                case Constants.TIM_HORTONS:
+                    t.setAmountCents(timsAmount);
+                    break;
+                case Constants.SUBWAY:
+                    t.setAmountCents(subAmount);
+                    break;
+                default:
+            }
         }
-        if (timhortons != null) {
-            timhortons.setAmountCents(timsAmount);
-        }
-        reset();
         return res;
     }
 }

@@ -5,30 +5,31 @@ public class RuleOne extends Rule {
      int p1 = 75;
      int p2 = 25;
      int p3 = 25;
+
+
      @Override
      public int calculate(List<Transaction> list) {
 
-         // get transaction
+         int sportAmount = 0;
+         int timsAmount = 0;
+         int subAmount = 0;
+         int res = 0;
+
+         // get amount
          for (Transaction t : list) {
              switch (t.getMerchantCode()) {
                  case Constants.SPORT_CHECK:
-                     sportcheck = t;
+                     sportAmount = t.getAmountCents();
                      break;
                  case Constants.TIM_HORTONS:
-                     timhortons = t;
+                     timsAmount = t.getAmountCents();
                      break;
                  case Constants.SUBWAY:
-                     subway = t;
+                     subAmount = t.getAmountCents();
                      break;
                  default:
              }
          }
-
-         // get amount
-         int sportAmount = sportcheck == null ? 0 : sportcheck.getAmountCents();
-         int timsAmount = timhortons == null ? 0 : timhortons.getAmountCents();
-         int subAmount = subway == null ? 0 : subway.getAmountCents();
-         int res = 0;
 
          // apply rule 1
          if (sportAmount >= p1 && timsAmount >= p2 && subAmount >= p3) {
@@ -40,17 +41,20 @@ public class RuleOne extends Rule {
          }
 
          // update amount
-         if (sportcheck != null) {
-             sportcheck.setAmountCents(sportAmount);
+         for (Transaction t : list) {
+             switch (t.getMerchantCode()) {
+                 case Constants.SPORT_CHECK:
+                     t.setAmountCents(sportAmount);
+                     break;
+                 case Constants.TIM_HORTONS:
+                     t.setAmountCents(timsAmount);
+                     break;
+                 case Constants.SUBWAY:
+                     t.setAmountCents(subAmount);
+                     break;
+                 default:
+             }
          }
-         if (timhortons != null) {
-             timhortons.setAmountCents(timsAmount);
-         }
-         if (subway != null) {
-             subway.setAmountCents(subAmount);
-         }
-
-         reset();
          return res;
      }
 }

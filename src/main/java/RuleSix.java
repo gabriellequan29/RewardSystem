@@ -5,31 +5,33 @@ public class RuleSix extends Rule {
     int point = 20;
     @Override
     public int calculate(List<Transaction> list) {
-        // get transaction
+        int sportAmount = 0;
+        int res = 0;
+
+        // get amount
         for (Transaction t : list) {
             switch (t.getMerchantCode()) {
                 case Constants.SPORT_CHECK:
-                    sportcheck = t;
-                    break;
-                case Constants.TIM_HORTONS:
-                    timhortons = t;
-                    break;
-                case Constants.SUBWAY:
-                    subway = t;
+                    sportAmount = t.getAmountCents();
                     break;
                 default:
             }
         }
-        int res = 0;
-        // get amount
-        int sportAmount = sportcheck == null ? 0 : sportcheck.getAmountCents();
+
         // apply rule 6
-        res += reward * (sportAmount / point);
+        int count = sportAmount / point;
+        res += reward * count;
+        sportAmount -= point * count;
+
         // update amount
-        if (sportcheck != null) {
-            sportcheck.setAmountCents(sportAmount % point);
+        for (Transaction t : list) {
+            switch (t.getMerchantCode()) {
+                case Constants.SPORT_CHECK:
+                    t.setAmountCents(sportAmount);
+                    break;
+                default:
+            }
         }
-        reset();
         return res;
     }
 }

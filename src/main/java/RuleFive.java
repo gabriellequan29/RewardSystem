@@ -6,25 +6,22 @@ public class RuleFive extends Rule {
     int p2 = 10;
     @Override
     public int calculate(List<Transaction> list) {
-        // get transaction
+        int sportAmount = 0;
+        int timsAmount = 0;
+        int res = 0;
+
+        // get amount
         for (Transaction t : list) {
             switch (t.getMerchantCode()) {
                 case Constants.SPORT_CHECK:
-                    sportcheck = t;
+                    sportAmount = t.getAmountCents();
                     break;
                 case Constants.TIM_HORTONS:
-                    timhortons = t;
-                    break;
-                case Constants.SUBWAY:
-                    subway = t;
+                    timsAmount = t.getAmountCents();
                     break;
                 default:
             }
         }
-        // get amount
-        int sportAmount = sportcheck == null ? 0 : sportcheck.getAmountCents();
-        int timsAmount = timhortons == null ? 0 : timhortons.getAmountCents();
-        int res = 0;
         // apply rule 5
         if (sportAmount >= p1 && timsAmount >= p2) {
             int count = Math.min(sportAmount / p1, timsAmount / p2);
@@ -33,13 +30,17 @@ public class RuleFive extends Rule {
             timsAmount -= p2 * count;
         }
         // update amount
-        if (sportcheck != null) {
-            sportcheck.setAmountCents(sportAmount);
+        for (Transaction t : list) {
+            switch (t.getMerchantCode()) {
+                case Constants.SPORT_CHECK:
+                    t.setAmountCents(sportAmount);
+                    break;
+                case Constants.TIM_HORTONS:
+                    t.setAmountCents(timsAmount);
+                    break;
+                default:
+            }
         }
-        if (timhortons != null) {
-            timhortons.setAmountCents(timsAmount);
-        }
-        reset();
         return res;
     }
 }

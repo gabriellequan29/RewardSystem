@@ -21,60 +21,14 @@ public class Reward {
                 "{\"id\": \"T09\",\"date\": \"2021-05-09\", \"merchant_code\" : \"sportcheck\", \"amount_cents\": 7326}," +
                 "{\"id\": \"T10\",\"date\": \"2021-05-10\", \"merchant_code\" : \"tim_hortons\", \"amount_cents\": 1321}" +
                         "]}";
-        String output = getReward(transactions);
+        RewardSystem rewardSystem = new RewardSystem();
+        RuleFactory ruleFactory = new RuleFactory();
+        rewardSystem.addRule(ruleFactory.createRule("Rule 1"));
+        rewardSystem.addRule(ruleFactory.createRule("Rule 2"));
+        rewardSystem.addRule(ruleFactory.createRule("Rule 4"));
+        rewardSystem.addRule(ruleFactory.createRule("Rule 6"));
+        rewardSystem.addRule(ruleFactory.createRule("Rule 7"));
+        String output = rewardSystem.getReward(transactions);
         System.out.println(output);
-    }
-
-    private static Map<String, Integer> amounts;
-    private static final String MERCHANT = "merchant_code";
-    private static final String AMOUNT = "amount_cents";
-    private static final String TRANSACTIONS = "transactions";
-    public static String getReward(String transactions) {
-        // merchant_code -> total amount_cent
-        amounts = new HashMap<>();
-        // parse input string
-        JSONObject obj = new JSONObject(transactions);
-        JSONArray arr = obj.getJSONArray(TRANSACTIONS);
-        StringBuilder output = new StringBuilder();
-        // append different rules according to priority
-        List<Rule> rules = new ArrayList<>();
-        rules.add(new RuleOne());
-        rules.add(new RuleTwo());
-        rules.add(new RuleFour());
-        rules.add(new RuleSix());
-        rules.add(new RuleSeven());
-        // calculate max reward points for each transaction
-        for (int i = 0; i < arr.length(); i++)
-        {
-            // parse the transaction
-            JSONObject transaction = arr.getJSONObject(i);
-            String id = transaction.getString("id");
-            String merchant_code = transaction.getString(MERCHANT);
-            int amount_cents = transaction.getInt(AMOUNT);
-            // update total_amount_cents for merchant_code
-            amounts.put(merchant_code, amounts.getOrDefault(merchant_code, 0) + amount_cents);
-            long points = 0;
-            List<Transaction> list = new ArrayList<>();
-            Transaction t = new Transaction(merchant_code, amount_cents);
-            list.add(t);
-            // apply rules to each transaction according to priority
-            for (Rule rule : rules) {
-                points += rule.calculate(list);
-            }
-            // append the result to the output
-            output.append(id).append("-").append(points).append("\n");
-        }
-        // calculate total max reward points
-        List<Transaction> list = new ArrayList<>();
-        for (String key : amounts.keySet()) {
-            Transaction t = new Transaction(key, amounts.get(key));
-            list.add(t);
-        }
-        long total = 0;
-        for (Rule rule : rules) {
-            total += rule.calculate(list);
-        }
-        output.append("Total-").append(total);
-        return output.toString();
     }
 }

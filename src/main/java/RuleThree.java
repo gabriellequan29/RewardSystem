@@ -5,31 +5,29 @@ public class RuleThree extends Rule {
     int point = 75;
     @Override
     public int calculate(List<Transaction> list) {
+        int sportAmount = 0;
+        int res = 0;
         // get transaction
         for (Transaction t : list) {
             switch (t.getMerchantCode()) {
                 case Constants.SPORT_CHECK:
-                    sportcheck = t;
-                    break;
-                case Constants.TIM_HORTONS:
-                    timhortons = t;
-                    break;
-                case Constants.SUBWAY:
-                    subway = t;
+                    sportAmount = t.getAmountCents();
                     break;
                 default:
             }
         }
-        int res = 0;
-        // get amount
-        int sportAmount = sportcheck == null ? 0 : sportcheck.getAmountCents();
+
         // apply rule 3
         res += reward * (sportAmount / point);
         // update amount
-        if (sportcheck != null) {
-            sportcheck.setAmountCents(sportAmount % point);
+        for (Transaction t : list) {
+            switch (t.getMerchantCode()) {
+                case Constants.SPORT_CHECK:
+                    t.setAmountCents(sportAmount);
+                    break;
+                default:
+            }
         }
-        reset();
         return res;
     }
 }
